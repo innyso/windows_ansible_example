@@ -5,8 +5,7 @@ Param
 )
 
 #defined initial data
-$LicenseStatus = @("Unlicensed","Licensed","OOB Grace",
-"OOT Grace","Non-Genuine Grace","Notification","Extended Grace")
+$LicenseStatus = @("Unlicensed","Licensed","OOB Grace", "OOT Grace","Non-Genuine Grace","Notification","Extended Grace")
 
 $result = Get-CimInstance -ClassName SoftwareLicensingProduct -ComputerName $ComputerName | 
     Where{$_.PartialProductKey -and $_.Name -like "*Windows*"} | 
