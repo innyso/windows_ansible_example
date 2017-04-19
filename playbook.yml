@@ -1,0 +1,34 @@
+---
+- hosts: all
+  remote_user: vagrant
+  tasks:
+    - name: Check windows activation
+      script: scripts/CheckActivation.ps1
+      register: activated
+
+    - name: make sure we have license keys
+      fail: msg="activation key not available"
+      when: activated.stdout.find("Licensed") == -1 and "{{activation_key}}" is not defined
+
+    - block:
+      - name: add licensed key
+        win_shell: cscript C:\Windows\System32\slmgr.vbs /ipk {{ activation_key }} 
+      - name: activate licensed key
+        win_shell: cscript C:\Windows\System32\slmgr.vbs /ato
+      when: activated.stdout.find("Licensed") == -1
+
+    - name: install useful tools
+      win_chocolatey: 
+        name: "{{item}}"
+        state: present
+      with_items:
+        - git
+        - chocolatey
+        - visualstudio2017enterprise
+
+    - name: add visual studio 2017 enterprise licence
+      win_shell: StorePID.exe "{{vs_activation_key}}" 08860
+      when: "{{vs_activation_key}}" is defined
+      args:
+        executable: cmd
+        chdir: 'C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\Common7\IDE\'
